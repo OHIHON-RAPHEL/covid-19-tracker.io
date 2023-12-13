@@ -6,12 +6,23 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent'
 import InfoBox from './InfoBox';
 import Map from './Map';
+import Table from './Table';
 import './App.css';
 
 function App() {
 
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState("Worldwide");
+  const [countryInfo, setCountryInfo] = useState({});
+  const [tableData, setTableData] = useState([]);
+
+  useEffect(() => {
+    fetch("https://disease.sh/v3/covid-19/all")
+    .then(response => response.json())
+    .then(data => {
+      setCountryInfo(data);
+    })
+  }, [])
 
   useEffect(() => {
     const getCountriesData = async () => {
@@ -23,6 +34,7 @@ function App() {
           value: country.countryInfo.iso2,
         }));
 
+        setTableData(data);
         setCountries(countries);
       });
     };
@@ -32,18 +44,28 @@ function App() {
 
   const onCountryChange = async (event) => {
     const countryCode = event.target.value;
-    console.log("Yoooo", countryCode);
-    setCountry(countryCode)
-  }
+    setCountry(countryCode);
+    
+    const url = countryCode === "worldwide"
+     ? "https://disease.sh/v3/covid-19/all"
+     : `https://disease.sh/v3/covid-19/countries/${countryCode}`
+
+    await fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      setCountry(countryCode);
+      setCountryInfo(data);
+    });
+  };
 
   return (
-    <div className='flex justify-evenly p-5'>
-      <div className='app__left'>
+    <div className='sm:flex justify-evenly p-5'>
+      <div className='flex-1'>
         <div className='flex justify-between items-center my-5'>
           <h1>COVID-19 TRACKER</h1>
           <FormControl className="app__dropdown">
             <Select variant="outlined" onChange={onCountryChange} value={country}>
-            <MenuItem value="outlined">Worldwide</MenuItem>
+            <MenuItem value="Worldwide">Worldwide</MenuItem>
               {countries.map((country) => {
                   return <MenuItem value={country.value}>{country.name}</MenuItem>
                 })}
@@ -52,9 +74,9 @@ function App() {
         </div>
 
         <div className='flex justify-between'>
-          <InfoBox title="Coronavirus Cases" cases={123} total={2000} />
-          <InfoBox title="Recovered" cases={1234} total={3000} />
-          <InfoBox title="Deaths" cases={12345} total={4000} />
+          <InfoBox title="Coronavirus Cases" cases={countryInfo.todayCases} total={countryInfo.cases} />
+          <InfoBox title="Recovered" cases={countryInfo.todayrecovered} total={countryInfo.recovered} />
+          <InfoBox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths} />
         </div>
 
         <Map/>
@@ -62,6 +84,7 @@ function App() {
       <Card className='app__right'>
         <CardContent>
           <h3>Live cases by country</h3>
+          <Table countries={tableData} />
           <h3>Worldwide new Cases</h3>
         </CardContent>
       </Card>
