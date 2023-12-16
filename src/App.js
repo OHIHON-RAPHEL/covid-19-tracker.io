@@ -7,6 +7,9 @@ import CardContent from '@mui/material/CardContent'
 import InfoBox from './InfoBox';
 import Map from './Map';
 import Table from './Table';
+import { sortData } from './util'
+import LineGraph from './LineGraph'
+import "leaflet/dist/leaflet.css"
 import './App.css';
 
 function App() {
@@ -15,6 +18,8 @@ function App() {
   const [country, setCountry] = useState("Worldwide");
   const [countryInfo, setCountryInfo] = useState({});
   const [tableData, setTableData] = useState([]);
+  const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng: -40.4796 });
+  const [mapZoom, setMapZoom] = useState(3);
 
   useEffect(() => {
     fetch("https://disease.sh/v3/covid-19/all")
@@ -34,7 +39,8 @@ function App() {
           value: country.countryInfo.iso2,
         }));
 
-        setTableData(data);
+        const sortedData = sortData(data);
+        setTableData(sortedData);
         setCountries(countries);
       });
     };
@@ -55,12 +61,14 @@ function App() {
     .then(data => {
       setCountry(countryCode);
       setCountryInfo(data);
+      setMapCenter([data.countryInfo.lat, data.countryInfo.lng]);
+      setMapZoom(4);
     });
   };
 
   return (
     <div className='sm:flex justify-evenly p-5'>
-      <div className='flex-1'>
+      <div className='flex-[0.6]'>
         <div className='flex justify-between items-center my-5'>
           <h1>COVID-19 TRACKER</h1>
           <FormControl className="app__dropdown">
@@ -79,13 +87,14 @@ function App() {
           <InfoBox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths} />
         </div>
 
-        <Map/>
+        <Map center={mapCenter} zoom={mapZoom}/>
       </div>
       <Card className='app__right'>
         <CardContent>
           <h3>Live cases by country</h3>
           <Table countries={tableData} />
           <h3>Worldwide new Cases</h3>
+          <LineGraph />
         </CardContent>
       </Card>
     </div>
