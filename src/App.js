@@ -7,7 +7,7 @@ import CardContent from '@mui/material/CardContent'
 import InfoBox from './InfoBox';
 import Map from './Map';
 import Table from './Table';
-import { sortData } from './util'
+import { sortData, prettyPrintStat } from './util'
 import LineGraph from './LineGraph'
 import "leaflet/dist/leaflet.css"
 import './App.css';
@@ -20,9 +20,11 @@ function App() {
   const [tableData, setTableData] = useState([]);
   const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng: -40.4796 });
   const [mapZoom, setMapZoom] = useState(3);
+  const [mapCountries, setMapCountries] = useState([]);
+  const [casesType, setCasesType] =useState("cases")
 
   useEffect(() => {
-    fetch("https://disease.sh/v3/covid-19/all")
+    fetch('https://disease.sh/v3/covid-19/all')
     .then(response => response.json())
     .then(data => {
       setCountryInfo(data);
@@ -31,7 +33,7 @@ function App() {
 
   useEffect(() => {
     const getCountriesData = async () => {
-      await fetch("https://disease.sh/v3/covid-19/countries")
+      await fetch('https://disease.sh/v3/covid-19/countries')
       .then((response) => response.json())
       .then((data) => {
         const countries = data.map((country) => ({
@@ -42,6 +44,7 @@ function App() {
         const sortedData = sortData(data);
         setTableData(sortedData);
         setCountries(countries);
+        setMapCountries(data);
       });
     };
 
@@ -68,10 +71,10 @@ function App() {
 
   return (
     <div className='sm:flex justify-evenly p-5'>
-      <div className='flex-[0.6]'>
+      <div className='flex-[0.8]'>
         <div className='flex justify-between items-center my-5'>
-          <h1>COVID-19 TRACKER</h1>
-          <FormControl className="app__dropdown">
+          <h1 className='font-bold text-2xl text-red-500'>COVID-19 TRACKER</h1>
+          <FormControl className="bg-white">
             <Select variant="outlined" onChange={onCountryChange} value={country}>
             <MenuItem value="Worldwide">Worldwide</MenuItem>
               {countries.map((country) => {
@@ -82,19 +85,39 @@ function App() {
         </div>
 
         <div className='flex justify-between'>
-          <InfoBox title="Coronavirus Cases" cases={countryInfo.todayCases} total={countryInfo.cases} />
-          <InfoBox title="Recovered" cases={countryInfo.todayrecovered} total={countryInfo.recovered} />
-          <InfoBox title="Deaths" cases={countryInfo.todayDeaths} total={countryInfo.deaths} />
+          <InfoBox
+            isRed={casesType === "cases"}
+            active={casesType === "cases"}
+            onClick={(e) => setCasesType("cases")}
+            title="Coronavirus Cases"
+            cases={prettyPrintStat(countryInfo.todayCases)}
+            total={prettyPrintStat(countryInfo.cases)}
+          />
+          <InfoBox
+            active={casesType === "recovered"}
+            onClick={(e) => setCasesType("recovered")}
+            title="Recovered"
+            cases={prettyPrintStat(countryInfo.todayrecovered)}
+            total={prettyPrintStat(countryInfo.recovered)}
+          />
+          <InfoBox
+            isRed={casesType === "deaths"}
+            active={casesType === "deaths"}
+            onClick={(e) => setCasesType("deaths")}
+            title="Deaths"
+            cases={prettyPrintStat(countryInfo.todayDeaths)}
+            total={prettyPrintStat(countryInfo.deaths)}
+          />
         </div>
 
-        <Map center={mapCenter} zoom={mapZoom}/>
+        <Map  casesType={casesType} countries={mapCountries} center={mapCenter} zoom={mapZoom}/>
       </div>
-      <Card className='app__right'>
-        <CardContent>
-          <h3>Live cases by country</h3>
+      <Card className='flex flex-col'>
+        <CardContent className='flex flex-col grow'>
+          <h3 className='font-bold text-xl'>Live cases by country</h3>
           <Table countries={tableData} />
-          <h3>Worldwide new Cases</h3>
-          <LineGraph />
+          <h3 className='mt-5 mb-5 font-bold text-xl'>Worldwide new {casesType}</h3>
+          <LineGraph className='grow' casesType={casesType}/>
         </CardContent>
       </Card>
     </div>
