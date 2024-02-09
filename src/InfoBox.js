@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography'
 
 const InfoBox = ({ title, cases, isRed, active, total, ...props }) => {
   return (
-    <Card onClick={props.onClick} className={`flex-[1] normally mr-2.5 cursor-pointer ${active && 'border-t-8 border-green-500'} ${isRed && 'border-t-8 border-red-600'}`}>
+    <Card onClick={props.onClick} className={`flex-[1] best of all mr-2.5 cursor-pointer ${active && 'border-t-8 border-green-500'} ${isRed && 'border-t-8 border-red-600'}`}>
        <CardContent>
          <Typography className='' color="textSecondary">{title}</Typography>
          <h2 className={`text-red-600 font-semibold text-[1.75rem] mb-[0.5rem] ${!isRed && 'text-green-500'}`}>{cases}</h2>
