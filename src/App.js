@@ -30,6 +30,7 @@ function App() {
       setCountryInfo(data);
     })
   }, [])
+  
 
   useEffect(() => {
     const getCountriesData = async () => {
@@ -123,6 +124,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;
