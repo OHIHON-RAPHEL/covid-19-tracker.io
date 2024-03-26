@@ -48,6 +48,7 @@ function App() {
         setMapCountries(data);
       });
     };
+    
 
     getCountriesData();
   }, [])
