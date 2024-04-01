@@ -30,7 +30,7 @@ function App() {
       setCountryInfo(data);
     })
   }, [])
-  
+
 
   useEffect(() => {
     const getCountriesData = async () => {
