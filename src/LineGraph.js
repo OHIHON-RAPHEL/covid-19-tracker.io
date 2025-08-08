@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { CategoryScale, Chart, LinearScale, PointElement, LineElement } from 'chart.js'
 import { Line } from 'react-chartjs-2';
